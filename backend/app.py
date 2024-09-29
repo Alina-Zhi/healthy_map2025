@@ -13,30 +13,34 @@ app = Flask(__name__,
             template_folder='../frontend')
 
 # 模拟城市数据（马里兰州）
-cities_data = {
-    'city': [
-        'New York', 'Philadelphia', 'Boston', 'Baltimore', 'Washington DC',
-        'Newark', 'Jersey City', 'Providence', 'Hartford', 'Stamford',
-        'Wilmington', 'Trenton', 'Alexandria', 'Richmond', 'Virginia Beach'
-    ]
-}
+# cities_data = {
+#     'city': [
+#         'New York', 'Philadelphia', 'Boston', 'Baltimore', 'Washington DC',
+#         'Newark', 'Jersey City', 'Providence', 'Hartford', 'Stamford',
+#         'Wilmington', 'Trenton', 'Alexandria', 'Richmond', 'Virginia Beach'
+#     ]
+# }
 
 
 @app.route('/')
 def serve_index():
     return render_template('index_copy.html')
 
+
 @app.route('/switchpage')
 def switch_page():
     return render_template('index.html')
+
 
 @app.route('/script.js')
 def serve_script():
     return send_from_directory('../frontend', 'script.js')
 
+
 @app.route('/style.css')
 def serve_style():
     return send_from_directory('../frontend', 'style.css')
+
 
 @app.route('/api/cities', methods=['POST'])
 def get_cities():
@@ -81,7 +85,6 @@ def get_cities():
         return jsonify({"error": "没有找到有效的城市"}), 404
 
 
-
 @app.route('/process', methods=['POST'])
 def process():
     global updated_data
@@ -89,14 +92,51 @@ def process():
     temp = data.get('temperatureControl', 0) + 1
     trees = data.get('treeControl', 0) + 1
     percps = data.get('cloudControl', 0) + 1
-    city_name = ['Philadelphia']
-    updated_data = city_name #{'a': temp, 'b': trees, 'c': percps}
+    city_data = {'temperature': temp, 'percipitation': percps}
+    city_name = find_cities(city_data)
+    updated_data = city_name
     print(updated_data)
     return city_name
+
 
 @app.route('/get-updated-values', methods=['GET'])
 def get_updated_values():
     return updated_data
+
+
+def find_cities(data):
+
+    # cities = load_city_data()
+    # data = request.json
+    target_temp = data['temperature']
+    # max_price = data['price']
+    target_precip = data.get('percipitation')
+    with open('houseprice.json', 'r') as file:
+        cities_data = json.load(file)
+    result = []
+    i = 0
+    for city in cities_data:
+        i += 1
+        if i > 500:
+            break
+        price = city.get('2024-08-31')
+        temp = city.get('temperature')
+        precip = city.get('precipitation')
+
+        if (price is not None and temp is not None and precip is not None and
+                # price <= max_price and
+                abs(temp - target_temp) <= 5 and
+                abs(precip - target_precip) <= 200):
+            result.append(city['RegionName'].split(', ')[0])
+            #         ({
+            #     'city': city['RegionName'].split(', ')[0],
+            #     'house_price': price,
+            #     'temperature': temp,
+            #     'precipitation': precip
+            # })
+
+    return jsonify(result if result else None)
+
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8001)
