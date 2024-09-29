@@ -61,45 +61,19 @@ async function highlightCities(cities) {
 
     // 检查 cities 数据是否为有效的 GeoJSON
     if (cities && cities.type === "Feature" && cities.geometry) {
-        const { geometry } = cities;
-
-        // 处理 Polygon 或 MultiPolygon
-        if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
-            let coordinatesList = [];
-
-            if (geometry.type === "Polygon") {
-                // 如果是 Polygon，获取单个多边形的坐标
-                coordinatesList = [geometry.coordinates[0]];
-            } else if (geometry.type === "MultiPolygon") {
-                // 如果是 MultiPolygon，遍历所有多边形
-                coordinatesList = geometry.coordinates.map(polygon => polygon[0]);
+        // 使用合并后的GeoJSON数据进行高亮
+        L.geoJSON(cities, {
+            style: {
+                color: 'blue',
+                weight: 2,
+                fillColor: 'lightblue',
+                fillOpacity: 0.5
             }
-
-            // 遍历每个坐标集合，计算中心并绘制圆
-            coordinatesList.forEach(coordinates => {
-                // 将坐标转换为 LatLng 格式
-                const latLng = coordinates.map(coord => L.latLng(coord[1], coord[0]));
-
-                // 获取多边形的边界框
-                const bounds = L.latLngBounds(latLng);
-
-                // 获取多边形的中心点
-                const center = bounds.getCenter();
-
-                // 仅绘制圆，不绘制多边形
-                L.circle(center, {
-                    color: 'blue',
-                    fillColor: 'lightblue',
-                    fillOpacity: 0.5,
-                    radius: 80000  // 半径为80公里（80000米）
-                }).addTo(map);
-            });
-        } else {
-            console.error("未识别的城市几何数据类型:", geometry.type);
-        }
+        }).addTo(map);
     } else {
         console.error("无效的城市数据或 GeoJSON 格式错误");
     }
 }
+
 
 

@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 import os
 import json
-from shapely.geometry import Polygon, MultiPolygon
+from shapely.geometry import Polygon, Point
 from shapely.ops import unary_union
 
 cur_dir = os.getcwd()
@@ -56,34 +56,36 @@ def get_cities():
     try:
         with open('output.json') as f:
             data = json.load(f)
-            print("成功读取 output.json")
     except Exception as e:
-        print(f"读取 output.json 时发生错误: {e}")
         return jsonify({"error": "无法读取数据文件"}), 500
 
-    # 收集所有城市的多边形
-    polygons = []
+    # 收集所有城市的圆形（以城市中心为基础，半径为80公里）
+    city_circles = []
+    radius_in_degrees = 80 / 111  # 80公里转换为地理坐标中的度数，1度约为111公里
+
     for feature in data:
         if feature["NAME"] in city_names:
             coordinates = feature["coordinates"]
-            print(f"城市 {feature['NAME']} 的坐标: {coordinates}")
 
-            # 创建城市的多边形
+            # 如果坐标是多边形，使用Polygon计算质心
             polygon = Polygon(coordinates)
-            polygons.append(polygon)
+            city_center = polygon.centroid  # 计算多边形的质心
 
-    # 合并所有城市的多边形成一个 MultiPolygon
-    if polygons:
-        merged_polygons = unary_union(polygons)  # 合并多边形
+            # 使用质心创建圆形
+            city_circle = city_center.buffer(radius_in_degrees)  # 创建半径为80公里的圆
+            city_circles.append(city_circle)
 
-        # 返回合并后的多边形 GeoJSON
+    # 合并所有圆形
+    if city_circles:
+        merged_area = unary_union(city_circles)
+
+        # 返回合并后的区域为 GeoJSON 格式
         return jsonify({
             "type": "Feature",
-            "geometry": merged_polygons.__geo_interface__  # 转换为GeoJSON格式
+            "geometry": merged_area.__geo_interface__  # 转换为GeoJSON格式
         })
     else:
-        return jsonify({"error": "No valid polygons found."}), 404
-
+        return jsonify({"error": "没有找到有效的城市"}), 404
 
 
 if __name__ == '__main__':
