@@ -231,6 +231,14 @@
                     <div class="range-label">10% - 100% Greening Rate</div>
                 </div>
             </td>
+            <td>
+                <div class="slider-wrapper">
+                    <div class="label" style="font-size: 26px;">Population</div>
+                    <input type="range" id="populationControl" min="1000" max="100000" value="1000" style="width: 400px;">
+                    <span id="valuePopulation">1000</span> <!-- 初始值设为1 -->
+                    <div class="range-label">1000 - 100000 Population</div>
+                </div>
+            </td>
         </tr>
     
         <!-- 第二行滑动条 -->
@@ -251,6 +259,14 @@
                     <input type="range" id="housePriceControl" min="100000" max="1000000" value="500000" style="width: 400px;">
                     <span id="valueHousePrice">$500,000</span> <!-- 初始值设为$500,000 -->
                     <div class="range-label">$100k - $1M</div>
+                </div>
+            </td>
+            <td>
+                <div class="slider-wrapper">
+                    <div class="label" style="font-size: 26px;">Urbanization</div>
+                    <input type="range" id="urbanControl" min="1" max="100" value="1" style="width: 400px;">
+                    <span id="valueUrban">1</span> <!-- 初始值设为1 -->
+                    <div class="range-label">1% - 100% Urbanization</div>
                 </div>
             </td>
             <button id="switchMap">Search</button>
@@ -419,6 +435,20 @@ function updateClouds(newCloudCount) {
             document.getElementById('valuePrecipitation').textContent = `${newCloudCount}% Precipitation`;
             updateClouds(newCloudCount);
         });
+
+        const populationControl = document.getElementById('populationControl');
+
+populationControl.addEventListener('input', function () {
+    const populationValue = populationControl.value;
+    document.getElementById('valuePopulation').textContent = populationValue.toLocaleString(); // Format the number with commas
+});
+const urbanControl = document.getElementById('urbanControl');
+
+urbanControl.addEventListener('input', function () {
+    const urbanValue = urbanControl.value;
+    document.getElementById('valueUrban').textContent = `${urbanValue}%`; // Add percentage symbol
+});
+
 
         // Initialize sun color and brightness
         temperatureControl.dispatchEvent(new Event('input'));
