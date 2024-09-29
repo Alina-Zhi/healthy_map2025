@@ -44,7 +44,6 @@ def serve_style():
 
 @app.route('/api/cities', methods=['POST'])
 def get_cities():
-    # 假设 city_names 是从前端发送过来的
     # city_names = cities_data['city']
     data = request.get_json()
     print(data)
@@ -54,7 +53,7 @@ def get_cities():
         with open('counties.json') as f:
             data = json.load(f)
     except Exception as e:
-        return jsonify({"error": "无法读取数据文件"}), 500
+        return jsonify({"error": "fail to load counties.json"}), 500
 
     # 收集所有城市的圆形（以城市中心为基础，半径为80公里）
     city_circles = []
@@ -82,7 +81,7 @@ def get_cities():
             "geometry": merged_area.__geo_interface__  # 转换为GeoJSON格式
         })
     else:
-        return jsonify({"error": "没有找到有效的城市"}), 404
+        return jsonify({"error": "do not find valid cities"}), 404
 
 
 @app.route('/process', methods=['POST'])
@@ -117,7 +116,7 @@ def find_cities(data):
     i = 0
     for city in cities_data:
         i += 1
-        if i > 500:
+        if i > 100:
             break
         price = city.get('2024-08-31')
         temp = city.get('temperature')

@@ -1,5 +1,5 @@
 const map = L.map('map', {
-    center: [39.9042, -76.4074],  // 北京的坐标
+    center: [39.8283, -98.5795],
     zoom: 5,                       // 初始缩放级别
     minZoom: 5,                   // 最小缩放级别
     maxZoom: 18,                  // 最大缩放级别
@@ -35,7 +35,7 @@ document.getElementById('switchBtn').addEventListener('click', function () {
 async function sendCityToBackend(cityName) {
     console.log("[!] get into function");
     try {
-        const response = await fetch('/api/cities', {  // 假设后端的路由是 /api/cities
+        const response = await fetch('/api/cities', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -96,10 +96,9 @@ async function highlightCities(cities) {
             }
         }).addTo(map);
     } else {
-        console.error("无效的城市数据或 GeoJSON 格式错误");
+        console.error("invalid cities data or GeoJSON");
     }
 }
-
 
 
 // Fetch the updated data from the backend
