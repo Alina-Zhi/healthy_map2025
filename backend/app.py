@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify, send_from_directory,render_template
 import os
 import json
-# from shapely.geometry import Polygon, Point
-# from shapely.ops import unary_union
+from shapely.geometry import Polygon, Point
+from shapely.ops import unary_union
 
 cur_dir = os.getcwd()
 helper_dir = os.path.abspath(os.path.join(cur_dir, '..'))

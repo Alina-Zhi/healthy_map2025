@@ -47,6 +47,7 @@ async function sendCityToBackend(cityName) {
             console.log("[!] response ok");
             const cities = await response.json(); // 接收返回的城市列表
             await highlightCities(cities); // 高亮显示城市
+            console.log("[!] highlight out")
         } else {// Fetch the updated data from the backend
             function fetchUpdatedData() {
                 fetch('/get-updated-values', {
@@ -75,41 +76,27 @@ async function sendCityToBackend(cityName) {
 
 
 async function highlightCities(cities) {
-    const cityList = cities.city;  // 从返回对象中提取 'city' 数组
     // 清除之前的高亮
     map.eachLayer(layer => {
-        if (layer instanceof L.GeoJSON) {
+        if (layer instanceof L.GeoJSON || layer instanceof L.Circle || layer instanceof L.Polygon) {
             map.removeLayer(layer);
         }
     });
 
-    // 并行处理所有请求
-    const promises = cityList.map(async (city) => {
-        try {
-            const city_response = await fetch(`https://nominatim.openstreetmap.org/search?city=${city}&format=json&polygon_geojson=1`);
-            const data = await city_response.json();
-
-            if (data && data[0] && data[0].geojson) {
-                const cityGeoJson = data[0].geojson;
-                console.log(city);
-
-                // 高亮城市边界
-                L.geoJSON(cityGeoJson, {
-                    style: {
-                        color: 'blue',
-                        weight: 2,
-                        fillColor: 'lightblue',
-                        fillOpacity: 0.5
-                    }
-                }).addTo(map);
+    // 检查 cities 数据是否为有效的 GeoJSON
+    if (cities && cities.type === "Feature" && cities.geometry) {
+        // 使用合并后的GeoJSON数据进行高亮
+        L.geoJSON(cities, {
+            style: {
+                color: 'blue',
+                weight: 2,
+                fillColor: 'lightblue',
+                fillOpacity: 0.5
             }
-        } catch (error) {
-            console.error(`获取城市 ${city} 的数据时发生错误`, error);
-        }
-    });
-
-    // 等待所有请求完成
-    await Promise.all(promises);
+        }).addTo(map);
+    } else {
+        console.error("无效的城市数据或 GeoJSON 格式错误");
+    }
 }
 
 
