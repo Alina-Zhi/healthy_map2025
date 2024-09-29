@@ -15,19 +15,20 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 // 处理城市输入并高亮显示
 document.getElementById('highlightBtn').addEventListener('click', () => {
     const cityName = document.getElementById('cityInput').value;
-    highlightCity(cityName);
+    sendCityToBackend(cityName);
 });
 
 // 监听回车键事件
 document.getElementById('cityInput').addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         const cityName = document.getElementById('cityInput').value;
-        highlightCity(cityName);
+        sendCityToBackend(cityName);
     }
 });
 
 // 将城市名称发送到后端并接收城市列表
 async function sendCityToBackend(cityName) {
+    console.log("[!] get into function");
     try {
         const response = await fetch('/api/cities', {  // 假设后端的路由是 /api/cities
             method: 'POST',
@@ -38,8 +39,9 @@ async function sendCityToBackend(cityName) {
         });
 
         if (response.ok) {
+            console.log("[!] response ok");
             const cities = await response.json(); // 接收返回的城市列表
-            highlightCities(cities); // 高亮显示城市
+            await highlightCities(cities); // 高亮显示城市
         } else {
             console.error('发送到后端时发生错误');
         }
@@ -48,8 +50,8 @@ async function sendCityToBackend(cityName) {
     }
 }
 
-// 高亮多个城市
-function highlightCities(cities) {
+async function highlightCities(cities) {
+    const cityList = cities.city;  // 从返回对象中提取 'city' 数组
     // 清除之前的高亮
     map.eachLayer(layer => {
         if (layer instanceof L.GeoJSON) {
@@ -57,17 +59,33 @@ function highlightCities(cities) {
         }
     });
 
-    cities.forEach(city => {
-        const cityGeoJson = city.geojson;
+    // 并行处理所有请求
+    const promises = cityList.map(async (city) => {
+        try {
+            const city_response = await fetch(`https://nominatim.openstreetmap.org/search?city=${city}&format=json&polygon_geojson=1`);
+            const data = await city_response.json();
 
-        // 高亮城市边界
-        L.geoJSON(cityGeoJson, {
-            style: {
-                color: 'blue',
-                weight: 2,
-                fillColor: 'lightblue',
-                fillOpacity: 0.5
+            if (data && data[0] && data[0].geojson) {
+                const cityGeoJson = data[0].geojson;
+                console.log(city);
+
+                // 高亮城市边界
+                L.geoJSON(cityGeoJson, {
+                    style: {
+                        color: 'blue',
+                        weight: 2,
+                        fillColor: 'lightblue',
+                        fillOpacity: 0.5
+                    }
+                }).addTo(map);
             }
-        }).addTo(map);
+        } catch (error) {
+            console.error(`获取城市 ${city} 的数据时发生错误`, error);
+        }
     });
+
+    // 等待所有请求完成
+    await Promise.all(promises);
 }
+
+
