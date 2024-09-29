@@ -26,6 +26,11 @@ document.getElementById('cityInput').addEventListener('keypress', (event) => {
     }
 });
 
+// 按键回到user input界面
+document.getElementById('switchBtn').addEventListener('click', function () {
+    window.location.href = '/';  // This will navigate back to index.html
+});
+
 // 将城市名称发送到后端并接收城市列表
 async function sendCityToBackend(cityName) {
     console.log("[!] get into function");
@@ -42,13 +47,32 @@ async function sendCityToBackend(cityName) {
             console.log("[!] response ok");
             const cities = await response.json(); // 接收返回的城市列表
             await highlightCities(cities); // 高亮显示城市
-        } else {
-            console.error('发送到后端时发生错误');
+        } else {// Fetch the updated data from the backend
+            function fetchUpdatedData() {
+                fetch('/get-updated-values', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    document.getElementById('result').textContent = `Updated values - Temp: ${result.a}, Tree: ${result.b}, Rain: ${result.c}`;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+    
+            // Fetch data when the page loads
+            window.onload = fetchUpdatedData;
+            console.error('error passing to backend');
         }
     } catch (error) {
-        console.error('请求失败:', error);
+        console.error('request error:', error);
     }
 }
+
 
 async function highlightCities(cities) {
     const cityList = cities.city;  // 从返回对象中提取 'city' 数组
@@ -89,3 +113,23 @@ async function highlightCities(cities) {
 }
 
 
+
+// Fetch the updated data from the backend
+function fetchUpdatedData() {
+    fetch('/get-updated-values', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        document.getElementById('result').textContent = `Updated values - Temp: ${result.a}, Tree: ${result.b}, Rain: ${result.c}`;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+// Fetch data when the page loads
+window.onload = fetchUpdatedData;

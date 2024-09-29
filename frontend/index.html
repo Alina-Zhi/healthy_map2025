@@ -8,11 +8,15 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />  <!-- 引入 Leaflet CSS -->
 </head>
 <body>
-    <input type="text" id="cityInput" placeholder="输入城市名称">  <!-- 输入框 -->
+    <input type="text" id="cityInput" placeholder="Enter City Name">  <!-- 输入框 -->
     <button id="highlightBtn">Search</button>  <!-- 按钮 -->
+    <button id="switchBtn">Switch to Input Page</button>
+    <div id="result">Waiting for data...</div>
+
     <div id="map"></div>  <!-- 地图显示区域 -->
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>  <!-- 引入 Leaflet JS -->
     <script src="script.js"></script>  <!-- 引入主 JavaScript 文件 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
 </body>
 </html>

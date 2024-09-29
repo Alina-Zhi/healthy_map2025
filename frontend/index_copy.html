@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Temperature Controlled Sunlight, Tree, Cloud, and House</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #87CEEB;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+        }
+
+        #scene {
+            width: 100%;
+            height: calc(100vh - 250px);
+            position: relative;
+            transition: background-color 0.3s ease;
+            overflow: visible;
+        }
+
+        .sun {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            transition: background-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .cloud {
+            width: 120px;
+            height: 60px;
+            background-color: white;
+            border-radius: 60px;
+            position: absolute;
+        }
+
+        .cloud:before,
+        .cloud:after {
+            content: '';
+            width: 80px;
+            height: 60px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: -20px;
+        }
+
+        .cloud:before {
+            left: 10px;
+        }
+
+        .cloud:after {
+            left: 40px;
+        }
+
+        .tree {
+    position: absolute;
+    width: 400px; /* Make the tree larger */
+    height: auto; /* Maintain aspect ratio */
+    bottom: -20px; /* Move the tree down so the roots are under the ground */
+    left: 100px; /* Adjust the left position as needed */
+    transform: translateY(30px); /* Further move down by 50px if necessary */
+
+}
+
+
+        .tree:before {
+            content: '';
+            bottom: 0;  /* Keep the house aligned with the bottom of the screen */
+            width: 100px;
+            height: 100px;
+            background-color: green;
+            border-radius: 50%;
+            position: absolute;
+            top: -50px;
+            left: -30px;
+        }
+
+/* Adjusted House Image */
+.house {
+    position: absolute;
+    bottom: 0;  /* Keep the house aligned with the bottom of the screen */
+    left: 50%;  /* Position the house at the center */
+    transform: translateX(-50%); /* Offset by 50% of the width to center it */
+    width: 250px;  /* Increase the house size */
+    height: auto;  /* Maintain the aspect ratio */
+    z-index: 10;   /* Keep the house on top of other elements */
+}
+
+
+        /* 美化滚动条 */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 80%;
+            height: 12px;
+            border-radius: 6px;
+            background: #d3d3d3;
+            outline: none;
+            transition: background 0.3s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffcc00;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            transition: background 0.3s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #ffd700;
+        }
+
+        /* 文字美化 */
+        .label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 额外微调标签和滑动条间距 */
+        .slider-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        /* 雨滴样式 */
+        .rain {
+            width: 3px;
+            height: 15px;
+            background-color: #00f;
+            border-radius: 50%;
+            position: absolute;
+            animation: rain-fall 0.5s infinite;
+        }
+
+        @keyframes rain-fall {
+            0% {
+                top: 0;
+                opacity: 1;
+            }
+
+            100% {
+                top: 60px;
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body style="font-family: 'Heiti SC', sans-serif; font-size: 20px;">
+    <div id="scene">
+        <div class="sun" id="sun"></div>
+        <img src="frontend/images/house.png" class="house" alt="House Image">
+    </div>
+    <!-- 使用 table 实现每行两个滑动条的布局 -->
+    <table>
+        <!-- 第一行滑动条 -->
+        <tr>
+            <td>
+                <!-- Temperature Control (0°C to 100°C) -->
+                <div class="slider-wrapper">
+                    <div class="label" style="font-size: 26px;">Temperature</div>
+                    <input type="range" id="temperatureControl" min="0" max="100" value="50" style="width: 400px;">
+                    <span id="valueTemperature">50</span> <!-- 初始值设为50，和滑动条保持一致 -->
+                    <div class="range-label">0°C - 100°C</div>
+                </div>
+            </td>
+            <td>
+                <!-- Tree Control (1 to 20 trees) -->
+                <div class="slider-wrapper">
+                    <div class="label" style="font-size: 26px;">Trees</div>
+                    <input type="range" id="treeControl" min="1" max="20" value="1" style="width: 400px;">
+                    <span id="valueTrees">1</span> <!-- 初始值设为1 -->
+                    <div class="range-label">1 - 20 Trees</div>
+                </div>
+            </td>
+        </tr>
+    
+        <!-- 第二行滑动条 -->
+        <tr>
+            <td>
+                <!-- Precipitation Control (1 to 10 clouds) -->
+                <div class="slider-wrapper">
+                    <div class="label" style="font-size: 26px;">Precipitation</div>
+                    <input type="range" id="cloudControl" min="1" max="10" value="1" style="width: 400px;">
+                    <span id="valuePrecipitation">1</span> <!-- 初始值设为1 -->
+                    <div class="range-label">1 - 10 Clouds</div>
+                </div>
+            </td>
+            <td>
+                <!-- House Price Control ($100,000 to $1,000,000) -->
+                <div class="slider-wrapper">
+                    <div class="label" style="font-size: 26px;">House Price</div>
+                    <input type="range" id="housePriceControl" min="100000" max="1000000" value="500000" style="width: 400px;">
+                    <span id="valueHousePrice">$500,000</span> <!-- 初始值设为$500,000 -->
+                    <div class="range-label">$100k - $1M</div>
+                </div>
+            </td>
+            <button id="switchMap">Search</button>
+        </tr>
+    </table>
+    
+
+
+
+
+    <script>
+        const temperatureControl = document.getElementById('temperatureControl');
+        const scene = document.getElementById('scene');
+        const sun = document.getElementById('sun');
+        const treeControl = document.getElementById('treeControl');
+        const cloudControl = document.getElementById('cloudControl');
+
+        let currentCloudCount = 0; // Keep track of the current number of clouds
+        document.getElementById('temperatureControl').textContent = temperatureControl.value;
+        document.getElementById('cloudControl').textContent = cloudControl.value;
+        // document.getElementById('valueC').textContent = sliderC.value;
+
+        // Update display when sliders are adjusted
+        temperatureControl.oninput = function () {
+            document.getElementById('temperatureControl').textContent = this.value;
+        };
+        cloudControl.oninput = function () {
+            document.getElementById('cloudControl').textContent = this.value;
+        };
+        // sliderC.oninput = function () {
+        //     document.getElementById('valueC').textContent = this.value;
+        // };
+
+        // Function to adjust the brightness and color of the sun based on temperature
+        temperatureControl.addEventListener('input', function () {
+            const tempValue = temperatureControl.value;
+            document.getElementById('valueTemperature').textContent = `${tempValue}°C`;
+
+            // 计算颜色变化比例
+            const brightnessFactor = tempValue / 100;
+
+            // 背景颜色变化：从蓝色到橙色
+            // 蓝色部分减少，红色和绿色部分增加
+            const redValue = 135 + Math.floor(120 * brightnessFactor);  // 从135（冷蓝）到255（暖橙）
+            const greenValue = 206 + Math.floor(59 * (1 - brightnessFactor));  // 从206（冷蓝）到165（暖橙）
+            const blueValue = 250 - Math.floor(250 * brightnessFactor); // 从250（冷蓝）到0（暖橙）
+
+            // 设置背景颜色
+            scene.style.backgroundColor = `rgb(${redValue}, ${greenValue}, ${blueValue})`;
+
+            // 同时调整太阳颜色，温度高变黄，温度低变橙
+            const sunGreenValue = 165 + Math.floor(90 * brightnessFactor); // 从165（橙色）到255（黄色）
+            const sunColor = `rgb(255, ${sunGreenValue}, 0)`;
+            sun.style.backgroundColor = sunColor;
+
+            // 可选：调整太阳的阴影强度
+            sun.style.boxShadow = `0 0 30px ${10 * brightnessFactor}px rgba(255, 255, 0, ${0.7 * brightnessFactor})`;
+        });
+
+
+        // Function to create and display trees based on the scroll bar value
+        // Function to create and display trees based on the scroll bar value
+        function updateTrees(treeCount) {
+    const existingTrees = document.querySelectorAll('.tree');
+    existingTrees.forEach(tree => tree.remove());
+
+    // Define a scale factor for the tree size (you can link this to a slider or fixed value)
+    const scaleFactor = 2; // Change this value to make the tree larger
+
+    for (let i = 0; i < treeCount; i++) {
+        // Create an img element instead of a div for the tree
+        const tree = document.createElement('img');
+        tree.classList.add('tree');
+        tree.src = 'frontend/images/tree.png'; // Path to your tree image
+
+        // Set the image styles and positioning
+        tree.style.position = 'absolute';
+        tree.style.width = `${60 * scaleFactor}px`; // Dynamically scale the width
+        tree.style.height = `${100 * scaleFactor}px`; // Dynamically scale the height
+        tree.style.bottom = `${16 * scaleFactor}px`; // Position roots below ground based on scale
+        tree.style.left = `${100 + i * (50 * scaleFactor)}px`; // Adjust horizontal spacing based on scale
+
+        // Append the image to the scene (or whichever container you're using)
+        scene.appendChild(tree);
+    }
+}
+
+
+
+        // Function to create and display clouds and rain randomly in the sky
+        // Function to create and display clouds and rain randomly in the sky
+function updateClouds(newCloudCount) {
+    const existingClouds = document.querySelectorAll('.cloud');
+    
+    // If there are more clouds currently than needed, remove the extra clouds
+    if (existingClouds.length > newCloudCount) {
+        const cloudDifference = existingClouds.length - newCloudCount;
+        for (let i = 0; i < cloudDifference; i++) {
+            existingClouds[existingClouds.length - 1 - i].remove();
+        }
+    }
+    // If there are fewer clouds, add more clouds
+    else if (existingClouds.length < newCloudCount) {
+        const cloudDifference = newCloudCount - existingClouds.length;
+        for (let i = 0; i < cloudDifference; i++) {
+            const cloud = document.createElement('div');
+            cloud.classList.add('cloud');
+            const randomTop = Math.random() * 200;
+            const randomLeft = Math.random() * (window.innerWidth - 150);
+            cloud.style.top = `${randomTop}px`;
+            cloud.style.left = `${randomLeft}px`;
+
+            // Add rain under each cloud
+            for (let j = 0; j < 10; j++) { // 增加雨滴数量
+                const rain = document.createElement('div');
+                rain.classList.add('rain');
+                rain.style.left = `${15 + j * 10}px`; // Space the rain drops evenly under the cloud
+                rain.style.top = '60px'; // 将雨滴从云朵底部开始下落
+                rain.style.height = '30px'; // 让雨滴变长，将高度增加到30px或任意值
+                cloud.appendChild(rain);
+            }
+
+            scene.appendChild(cloud);
+        }
+    }
+
+    // Update the current cloud count to match the new value
+    currentCloudCount = newCloudCount;
+}
+        // pass data to backend and switch to map page
+        document.getElementById('switchMap').addEventListener('click', function () {
+            const data = {
+                "temperatureControl": parseInt(document.getElementById('temperatureControl').value),
+                "treeControl": parseInt(document.getElementById('treeControl').value),
+                "cloudControl": parseInt(document.getElementById('cloudControl').value)
+            };
+
+            fetch('/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Data sent successfully:', result);
+                // Navigate to page2 after data is sent
+                window.location.href = '/switchpage';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        treeControl.addEventListener('input', function () {
+            const treeCount = treeControl.value;
+            // document.getElementById('treeControl').textContent = `${treeValue}`;
+            document.getElementById('valueTrees').textContent = `${treeCount} Tree${treeCount > 1 ? 's' : ''}`;
+            updateTrees(treeCount);
+        });
+
+        cloudControl.addEventListener('input', function () {
+            const newCloudCount = cloudControl.value;
+            // document.getElementById('cloudControl').textContent = `${cloudValue}`;
+            document.getElementById('valuePrecipitation').textContent = `${newCloudCount} Cloud${newCloudCount > 1 ? 's' : ''}`;
+            updateClouds(newCloudCount);
+        });
+
+        // Initialize sun color and brightness
+        temperatureControl.dispatchEvent(new Event('input'));
+
+        updateTrees(treeControl.value);
+        updateClouds(cloudControl.value);
+        const housePriceControl = document.getElementById('housePriceControl');
+        const house = document.querySelector('.house');
+        // const roof = document.querySelector('.roof');
+
+        document.getElementById('switchMap').addEventListener('click', function () {
+            window.location.href = '/switchpage';  // This will navigate to page2.html
+        });
+
+        // Function to adjust the house size based on price
+        housePriceControl.addEventListener('input', function () {
+    const priceValue = housePriceControl.value;
+    document.getElementById('valueHousePrice').textContent = `$${parseInt(priceValue).toLocaleString()}`;
+    
+    // Scale the house size based on the price
+    const scaleFactor = priceValue / 1000000; // House size scales between 0.1 and 1 of the original size
+
+    house.style.transform = `translateX(-50%) scale(${1 + scaleFactor})`;
+    house.style.transformOrigin = 'center bottom'; // Keep the house bottom fixed while scaling
+    house.style.bottom = `-${5}px`; // Position roots below ground based on scale
+});
+
+    </script>
+</body>
+
+</html>
