@@ -163,6 +163,45 @@
             }
         }
     </style>
+    <style>
+        /* Flex container for scroll bars and button */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Ensures button is on the right */
+            width: 100%; /* Make it span the full width */
+            max-width: 1000px; /* Optional, to limit the width */
+            margin: 0 auto; /* Center the container horizontally */
+        }
+    
+        /* Search button styles */
+        #switchMap {
+    background-color: #ffcc00; /* Yellow background */
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.2s;
+    margin-left: 20px; /* Space between scroll bars and button */
+    margin-top: 20px; /* Add some margin to move it down */
+}
+
+    
+        #switchMap:hover {
+            background-color: #ffd700; /* Lighter yellow on hover */
+            transform: scale(1.05); /* Slightly enlarge button on hover */
+        }
+    
+        #switchMap:active {
+            background-color: #e6b800; /* Darker yellow on click */
+            transform: scale(0.98); /* Slightly shrink button on click */
+        }
+    </style>
+    
 </head>
 
 <body style="font-family: 'Heiti SC', sans-serif; font-size: 20px;">
@@ -175,21 +214,21 @@
         <!-- 第一行滑动条 -->
         <tr>
             <td>
-                <!-- Temperature Control (0°C to 100°C) -->
+                <!-- Temperature Control (0°C to 100°F) -->
                 <div class="slider-wrapper">
                     <div class="label" style="font-size: 26px;">Temperature</div>
-                    <input type="range" id="temperatureControl" min="0" max="100" value="50" style="width: 400px;">
-                    <span id="valueTemperature">50</span> <!-- 初始值设为50，和滑动条保持一致 -->
-                    <div class="range-label">0°C - 100°C</div>
+                    <input type="range" id="temperatureControl" min="-4" max="104" value="78" style="width: 400px;">
+                    <span id="valueTemperature">78</span> <!-- 初始值设为50，和滑动条保持一致 -->
+                    <div class="range-label">-4°F - 104°F</div>
                 </div>
             </td>
             <td>
                 <!-- Tree Control (1 to 20 trees) -->
                 <div class="slider-wrapper">
-                    <div class="label" style="font-size: 26px;">Trees</div>
-                    <input type="range" id="treeControl" min="1" max="20" value="1" style="width: 400px;">
+                    <div class="label" style="font-size: 26px;">GreeningRate</div>
+                    <input type="range" id="treeControl" min="1" max="10" value="1" style="width: 400px;">
                     <span id="valueTrees">1</span> <!-- 初始值设为1 -->
-                    <div class="range-label">1 - 20 Trees</div>
+                    <div class="range-label">10% - 100% Greening Rate</div>
                 </div>
             </td>
         </tr>
@@ -200,9 +239,9 @@
                 <!-- Precipitation Control (1 to 10 clouds) -->
                 <div class="slider-wrapper">
                     <div class="label" style="font-size: 26px;">Precipitation</div>
-                    <input type="range" id="cloudControl" min="1" max="10" value="1" style="width: 400px;">
+                    <input type="range" id="cloudControl" min="1" max="100" value="1" style="width: 400px;">
                     <span id="valuePrecipitation">1</span> <!-- 初始值设为1 -->
-                    <div class="range-label">1 - 10 Clouds</div>
+                    <div class="range-label">1% - 100% Clouds</div>
                 </div>
             </td>
             <td>
@@ -377,7 +416,7 @@ function updateClouds(newCloudCount) {
         cloudControl.addEventListener('input', function () {
             const newCloudCount = cloudControl.value;
             // document.getElementById('cloudControl').textContent = `${cloudValue}`;
-            document.getElementById('valuePrecipitation').textContent = `${newCloudCount} Cloud${newCloudCount > 1 ? 's' : ''}`;
+            document.getElementById('valuePrecipitation').textContent = `${newCloudCount}% Cloud${newCloudCount > 1 ? 's' : ''}`;
             updateClouds(newCloudCount);
         });
 
