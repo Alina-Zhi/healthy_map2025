@@ -15,24 +15,11 @@ app = Flask(__name__,
 # 模拟城市数据（马里兰州）
 cities_data = {
     'city': [
-        'New York',       # 纽约
-        'Philadelphia',   # 费城
-        'Boston',         # 波士顿
-        'Baltimore',      # 巴尔的摩
-        'Washington DC',  # 华盛顿特区
-        'Newark',         # 纽瓦克
-        'Jersey City',    # 泽西市
-        'Providence',     # 普罗维登斯
-        'Hartford',       # 哈特福德
-        'Stamford',       # 斯坦福
-        'Wilmington',     # 威尔明顿
-        'Trenton',        # 特伦顿
-        'Alexandria',     # 亚历山德里亚
-        'Richmond',       # 里士满
-        'Virginia Beach'  # 弗吉尼亚海滩
+        'New York', 'Philadelphia', 'Boston', 'Baltimore', 'Washington DC',
+        'Newark', 'Jersey City', 'Providence', 'Hartford', 'Stamford',
+        'Wilmington', 'Trenton', 'Alexandria', 'Richmond', 'Virginia Beach'
     ]
 }
-
 
 
 @app.route('/')
@@ -54,7 +41,7 @@ def get_cities():
 
     # 读取 output.json 文件
     try:
-        with open('output.json') as f:
+        with open('counties.json') as f:
             data = json.load(f)
     except Exception as e:
         return jsonify({"error": "无法读取数据文件"}), 500
