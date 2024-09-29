@@ -1,6 +1,6 @@
 const map = L.map('map', {
-    center: [39.9042, -76.4074],  // 北京的坐标
-    zoom: 5,                       // 初始缩放级别
+    center: [39.9042, -76.4074],
+    zoom: 6,                       // 初始缩放级别
     minZoom: 5,                   // 最小缩放级别
     maxZoom: 18,                  // 最大缩放级别
     worldCopyJump: true           // 启用世界复制跳跃，防止地图重复
@@ -59,81 +59,47 @@ async function highlightCities(cities) {
         }
     });
 
-    // 使用后端返回的GeoJSON数据进行高亮
-    L.geoJSON(cities, {
-        style: {
-            color: 'blue',
-            weight: 2,
-            fillColor: 'lightblue',
-            fillOpacity: 0.5
+    // 检查 cities 数据是否为有效的 GeoJSON
+    if (cities && cities.type === "Feature" && cities.geometry) {
+        const { geometry } = cities;
+
+        // 处理 Polygon 或 MultiPolygon
+        if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
+            let coordinatesList = [];
+
+            if (geometry.type === "Polygon") {
+                // 如果是 Polygon，获取单个多边形的坐标
+                coordinatesList = [geometry.coordinates[0]];
+            } else if (geometry.type === "MultiPolygon") {
+                // 如果是 MultiPolygon，遍历所有多边形
+                coordinatesList = geometry.coordinates.map(polygon => polygon[0]);
+            }
+
+            // 遍历每个坐标集合，计算中心并绘制圆
+            coordinatesList.forEach(coordinates => {
+                // 将坐标转换为 LatLng 格式
+                const latLng = coordinates.map(coord => L.latLng(coord[1], coord[0]));
+
+                // 获取多边形的边界框
+                const bounds = L.latLngBounds(latLng);
+
+                // 获取多边形的中心点
+                const center = bounds.getCenter();
+
+                // 仅绘制圆，不绘制多边形
+                L.circle(center, {
+                    color: 'blue',
+                    fillColor: 'lightblue',
+                    fillOpacity: 0.5,
+                    radius: 80000  // 半径为80公里（80000米）
+                }).addTo(map);
+            });
+        } else {
+            console.error("未识别的城市几何数据类型:", geometry.type);
         }
-    }).addTo(map);
+    } else {
+        console.error("无效的城市数据或 GeoJSON 格式错误");
+    }
 }
-
-
-
-//async function highlightCities(cities) {
-//    const cityList = cities.city;  // 从返回对象中提取 'city' 数组
-//    const points = [];  // 存储城市中心点
-//
-//    // 清除之前的高亮
-//    map.eachLayer(layer => {
-//        if (layer instanceof L.GeoJSON || layer instanceof L.Circle || layer instanceof L.Polygon) {
-//            map.removeLayer(layer);
-//        }
-//    });
-//
-//    // 并行处理所有请求
-//    const promises = cityList.map(async (city) => {
-//        try {
-//            const city_response = await fetch(`https://nominatim.openstreetmap.org/search?city=${city}&format=json`);
-//            const data = await city_response.json();
-//
-//            if (data && data[0]) {
-//                const lat = parseFloat(data[0].lat); // 确保获取的是数字
-//                const lon = parseFloat(data[0].lon); // 确保获取的是数字
-//
-//                // 确保lat和lon是有效数字
-//                if (!isNaN(lat) && !isNaN(lon)) {
-//                    points.push([lon, lat]);  // 将城市中心点添加到数组中
-//                } else {
-//                    console.error(`无效的坐标: ${lat}, ${lon}`);
-//                }
-//            }
-//        } catch (error) {
-//            console.error(`获取城市 ${city} 的数据时发生错误`, error);
-//        }
-//    });
-//
-//    // 等待所有请求完成
-//    await Promise.all(promises);
-//
-//    // 如果有点，则创建一个多边形
-//    if (points.length > 0) {
-//        const radiusInKm = 80;
-//
-//        // 创建缓冲区
-//        const bufferedPolygons = points.map(point =>
-//            turf.buffer(turf.point(point), radiusInKm, { units: 'kilometers' })
-//        );
-//
-//        // 合并所有的缓冲区
-//        const merged = turf.union(...bufferedPolygons);
-//
-//        // 将合并后的多边形添加到地图
-//        L.geoJSON(merged.geometry, {
-//            style: {
-//                color: 'blue',
-//                weight: 2,
-//                fillColor: 'lightblue',
-//                fillOpacity: 0.5
-//            }
-//        }).addTo(map);
-//    }
-//}
-
-
-
-
 
 
