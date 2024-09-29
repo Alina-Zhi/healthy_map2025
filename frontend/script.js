@@ -48,27 +48,28 @@ async function sendCityToBackend(cityName) {
             const cities = await response.json(); // 接收返回的城市列表
             await highlightCities(cities); // 高亮显示城市
             console.log("[!] highlight out")
-        } else {// Fetch the updated data from the backend
-            function fetchUpdatedData() {
-                fetch('/get-updated-values', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(result => {
-                    document.getElementById('result').textContent = `Updated values - Temp: ${result.a}, Tree: ${result.b}, Rain: ${result.c}`;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            }
-    
-            // Fetch data when the page loads
-            window.onload = fetchUpdatedData;
-            console.error('error passing to backend');
-        }
+           }
+//          else {// Fetch the updated data from the backend
+//            function fetchUpdatedData() {
+//                fetch('/get-updated-values', {
+//                    method: 'GET',
+//                    headers: {
+//                        'Content-Type': 'application/json'
+//                    }
+//                })
+//                .then(response => response.json())
+//                .then(result => {
+//                    document.getElementById('result').textContent = `Updated values - Temp: ${result.a}, Tree: ${result.b}, Rain: ${result.c}`;
+//                })
+//                .catch(error => {
+//                    console.error('Error:', error);
+//                });
+//            }
+//
+//            // Fetch data when the page loads
+//            window.onload = fetchUpdatedData;
+//            console.error('error passing to backend');
+//        }
     } catch (error) {
         console.error('request error:', error);
     }
@@ -111,7 +112,9 @@ function fetchUpdatedData() {
     })
     .then(response => response.json())
     .then(result => {
-        document.getElementById('result').textContent = `Updated values - Temp: ${result.a}, Tree: ${result.b}, Rain: ${result.c}`;
+          document.getElementById('result').textContent = `Cities:${result}`;
+          console.log("[*] hi i am in");
+          sendCityToBackend(result);
     })
     .catch(error => {
         console.error('Error:', error);

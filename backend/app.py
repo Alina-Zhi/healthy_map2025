@@ -41,8 +41,10 @@ def serve_style():
 @app.route('/api/cities', methods=['POST'])
 def get_cities():
     # 假设 city_names 是从前端发送过来的
-    city_names = cities_data['city']
-
+    # city_names = cities_data['city']
+    data = request.get_json()
+    print(data)
+    city_names = data.get('city')
     # 读取 output.json 文件
     try:
         with open('counties.json') as f:
@@ -87,12 +89,14 @@ def process():
     temp = data.get('temperatureControl', 0) + 1
     trees = data.get('treeControl', 0) + 1
     percps = data.get('cloudControl', 0) + 1
-    updated_data = {'a': temp, 'b': trees, 'c': percps}
-    return jsonify(updated_data)
+    city_name = ['Philadelphia']
+    updated_data = city_name #{'a': temp, 'b': trees, 'c': percps}
+    print(updated_data)
+    return city_name
 
 @app.route('/get-updated-values', methods=['GET'])
 def get_updated_values():
-    return jsonify(updated_data)
+    return updated_data
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8001)
