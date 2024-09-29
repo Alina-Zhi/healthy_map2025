@@ -1,6 +1,13 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,send_from_directory
+import os
 
-app = Flask(__name__)
+cur_dir = os.getcwd()
+helper_dir = os.path.abspath(os.path.join(cur_dir, '..'))
+print(helper_dir)
+
+app = Flask(__name__,
+            static_folder='../frontend',
+            template_folder='../frontend')
 
 # 模拟城市数据（马里兰州）
 cities_data = {
@@ -15,6 +22,19 @@ cities_data = {
     'salisbury': ['Salisbury', 'Salisbury City'],
     'laurel': ['Laurel', 'Laurel City'],
 }
+
+
+@app.route('/')
+def serve_index():
+    return send_from_directory('../frontend', 'index.html')
+
+@app.route('/script.js')
+def serve_script():
+    return send_from_directory('../frontend', 'script.js')
+
+@app.route('/style.css')
+def serve_style():
+    return send_from_directory('../frontend', 'style.css')
 
 
 @app.route('/api/cities', methods=['POST'])
